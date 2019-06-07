@@ -32,11 +32,18 @@ class RecipeSerializer(serializers.ModelSerializer):
         queryset=Tag.objects.all()
     )
 
+    total_ingredients = serializers.SerializerMethodField()
+
+    def get_total_ingredients(self, recipe):
+        """Return the total of ingredients in the recipe"""
+        return recipe.ingredients.count()
+
     class Meta:
         model = Recipe
         fields = (
             'id', 'title', 'ingredients', 'tags',
-            'time_minutes', 'price', 'link'
+            'time_minutes', 'price', 'link',
+            'total_ingredients'
         )
         read_only_fields = ('id',)
 

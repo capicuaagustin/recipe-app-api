@@ -289,3 +289,37 @@ class RecipeImageUploadTests(TestCase):
         self.assertIn(serializer1.data, res.data)
         self.assertIn(serializer2.data, res.data)
         self.assertNotIn(serializer3.data, res.data)
+
+
+# extra
+
+
+class RecipeExtraTests(TestCase):
+    """Extra recipe tests"""
+
+    def setUp(self):
+        self.client = APIClient()
+        self.user = get_user_model().objects.create_user(
+            'user@capicua.com.uy',
+            'testpass'
+        )
+        self.client.force_authenticate(self.user)
+        self.recipe = sample_recipe(user=self.user)
+
+    def test_get_total_ingredients(self):
+        """Test returning the number of ingredients in a recipe"""
+        recipe = sample_recipe(user=self.user, title="Cheeseburger")
+        ingredient1 = sample_ingredient(user=self.user, name='Bun')
+        ingredient2 = sample_ingredient(user=self.user, name='Burger')
+        ingredient3 = sample_ingredient(user=self.user, name='Cheese')
+        recipe.ingredients.add(ingredient1)
+        recipe.ingredients.add(ingredient2)
+        recipe.ingredients.add(ingredient3)
+
+        url = detail_url(recipe.id)
+        res = self.client.get(url)
+
+        serializer = RecipeDetailSerializer(recipe)
+
+        self.assertEqual(res.data, serializer.data)
+        self.assertEqual(res.data['total_ingredients'], 3)
