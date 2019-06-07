@@ -69,6 +69,7 @@ class Ingredient(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
     )
+    calories = models.IntegerField(default=0)
 
     def __str__(self):
         return self.name

@@ -33,9 +33,14 @@ def sample_tag(user, name='Main course'):
     return Tag.objects.create(user=user, name=name)
 
 
-def sample_ingredient(user, name='Cinnamon'):
+def sample_ingredient(user, **params):
     """Create and return a sample ingredient"""
-    return Ingredient.objects.create(user=user, name=name)
+    defaults = {
+        'name': 'Cinnamon',
+        'calories': 0
+    }
+    defaults.update(params)
+    return Ingredient.objects.create(user=user, **defaults)
 
 
 def sample_recipe(user, **params):
@@ -323,3 +328,33 @@ class RecipeExtraTests(TestCase):
 
         self.assertEqual(res.data, serializer.data)
         self.assertEqual(res.data['total_ingredients'], 3)
+
+    def test_get_total_calories(self):
+        """Test returning the total calories for a recipe"""
+        recipe = sample_recipe(user=self.user, title='Cheesecake')
+        ingredient1 = sample_ingredient(
+                                        user=self.user,
+                                        name='Flour',
+                                        calories=200
+                                        )
+        ingredient2 = sample_ingredient(
+                                        user=self.user,
+                                        name='Milk',
+                                        calories=80
+                                        )
+        ingredient3 = sample_ingredient(
+                                        user=self.user,
+                                        name='Cheese',
+                                        calories=160
+                                        )
+        recipe.ingredients.add(ingredient1)
+        recipe.ingredients.add(ingredient2)
+        recipe.ingredients.add(ingredient3)
+
+        url = detail_url(recipe.id)
+        res = self.client.get(url)
+
+        serializer = RecipeDetailSerializer(recipe)
+
+        self.assertEqual(res.data, serializer.data)
+        self.assertEqual(res.data['total_calories'], 440)

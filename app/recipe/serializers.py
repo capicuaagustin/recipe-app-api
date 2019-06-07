@@ -17,7 +17,7 @@ class IngredientSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Ingredient
-        fields = ('id', 'name')
+        fields = ('id', 'name', 'calories')
         read_only_fields = ('id',)
 
 
@@ -33,17 +33,25 @@ class RecipeSerializer(serializers.ModelSerializer):
     )
 
     total_ingredients = serializers.SerializerMethodField()
+    total_calories = serializers.SerializerMethodField()
 
     def get_total_ingredients(self, recipe):
         """Return the total of ingredients in the recipe"""
         return recipe.ingredients.count()
+
+    def get_total_calories(self, recipe):
+        """Return the total calories from ingredients"""
+        tot_cal = 0
+        for ing in recipe.ingredients.all():
+            tot_cal += ing.calories
+        return tot_cal
 
     class Meta:
         model = Recipe
         fields = (
             'id', 'title', 'ingredients', 'tags',
             'time_minutes', 'price', 'link',
-            'total_ingredients'
+            'total_ingredients', 'total_calories'
         )
         read_only_fields = ('id',)
 
